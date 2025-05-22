@@ -1,0 +1,5 @@
+{
+  "name": "AI Handwritten Text Converter",
+  "description": "A web application to convert typed or uploaded documents into realistic handwritten outputs using various human-like styles, paper types, and pen effects. Customize and export your documents with ease.",
+  "requestFramePermissions": []
+}

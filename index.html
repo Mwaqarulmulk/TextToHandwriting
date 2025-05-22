@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Handwritten Text Converter | Realistic Handwriting Generator</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Convert typed text or documents into realistic, human-like handwriting. Customize styles, paper, pen effects, and export to PDF/images with our AI-powered tool." />
+  <meta name="keywords" content="handwriting converter, text to handwriting, digital handwriting, realistic handwriting, handwritten documents, online handwriting tool, AI handwriting, script generator, cursive generator, document styler" />
+  <!-- ‼️ IMPORTANT: Replace YOUR_APP_URL_HERE with your actual app URL ‼️ -->
+  <link rel="canonical" href="YOUR_APP_URL_HERE" /> 
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <!-- ‼️ IMPORTANT: Replace YOUR_APP_URL_HERE ‼️ -->
+  <meta property="og:url" content="YOUR_APP_URL_HERE"> 
+  <meta property="og:title" content="AI Handwritten Text Converter | Realistic Handwriting Generator">
+  <meta property="og:description" content="Convert typed text or documents into realistic, human-like handwriting. Customize styles, paper, pen effects, and export to PDF/images.">
+  <!-- ‼️ IMPORTANT: Replace with a URL to a compelling preview image for your app ‼️ -->
+  <meta property="og:image" content="YOUR_APP_PREVIEW_IMAGE_URL_HERE"> 
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <!-- ‼️ IMPORTANT: Replace YOUR_APP_URL_HERE ‼️ -->
+  <meta property="twitter:url" content="YOUR_APP_URL_HERE"> 
+  <meta property="twitter:title" content="AI Handwritten Text Converter | Realistic Handwriting Generator">
+  <meta property="twitter:description" content="Convert typed text or documents into realistic, human-like handwriting. Customize styles, paper, pen effects, and export to PDF/images.">
+  <!-- ‼️ IMPORTANT: Replace with a URL to a compelling preview image for your app ‼️ -->
+  <meta property="twitter:image" content="YOUR_APP_PREVIEW_IMAGE_URL_HERE"> 
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;700&family=Patrick+Hand&family=Architects+Daughter&family=Dancing+Script:wght@400;700&family=Indie+Flower&family=Permanent+Marker&family=Rock+Salt&family=Shadows+Into+Light&family=Homemade+Apple&family=Amatic+SC:wght@400;700&family=Satisfy&family=Marck+Script&family=Cedarville+Cursive&family=Bad+Script&family=Nanum+Pen+Script&family=Gaegu:wght@300;400;700&family=East+Sea+Dokdo&family=Stylish&family=Schoolbell&display=swap" rel="stylesheet">
+  
+  <!-- mammoth.js for .docx parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- pdf.js for .pdf parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';</script>
+  <!-- html2canvas for image export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jspdf for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer base {
+      /* Custom scrollbar for preview pane and other scrollable areas for aesthetics */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1; /* Light grey track */
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #a0aec0; /* Tailwind gray-500 */
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #718096; /* Tailwind gray-600 */
+      }
+      /* For Firefox */
+      .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #a0aec0 #f1f1f1;
+      }
+    }
+    @layer utilities {
+      .bg-ruled-paper {
+        background-image: linear-gradient(to bottom, transparent calc(1.5em - 1px), #cbd5e1 1.5em); /* Assumes base line-height of 1.5em */
+        background-size: 100% 1.5em;
+      }
+      .bg-ruled-paper-double {
+        background-image: 
+          linear-gradient(to bottom, transparent calc(1.5em - 2px), #fca5a5 calc(1.5em - 1px), #fca5a5 1.5em, transparent 1.5em), /* Thin red line */
+          linear-gradient(to bottom, transparent calc(1.5em - 1px), #cbd5e1 1.5em);
+        background-size: 100% 1.5em;
+      }
+      .bg-graph-paper {
+        background-image:
+          linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+          linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
+        background-size: 20px 20px;
+      }
+      .paper-texture-wrinkled {
+        background-image: url('https://www.transparenttextures.com/patterns/crissxcross.png'); /* Example texture */
+        background-blend-mode: overlay;
+        opacity: 0.8;
+      }
+      .paper-texture-old {
+        background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+        background-blend-mode: multiply;
+        opacity: 0.7;
+      }
+
+      /* New Assignment Paper Styles */
+      .bg-assignment-margin-left {
+        background-color: white; /* Base color */
+        background-image:
+            /* Horizontal blue lines */
+            linear-gradient(to bottom, transparent calc(1.5em - 1px), #93c5fd /* blue-300 */ 1.5em),
+            /* Vertical red margin line */
+            linear-gradient(to right, transparent 39px, #ef4444 /* red-500 */ 39px, #ef4444 40px, transparent 40px);
+        background-size: 100% 1.5em, 100% 100%;
+        background-repeat: repeat-y, no-repeat;
+        background-position: left top, left top;
+      }
+      .bg-assignment-margin-both {
+        background-color: white; /* Base color */
+        background-image:
+            /* Horizontal blue lines */
+            linear-gradient(to bottom, transparent calc(1.5em - 1px), #93c5fd /* blue-300 */ 1.5em),
+            /* Vertical red left margin line */
+            linear-gradient(to right, transparent 39px, #ef4444 /* red-500 */ 39px, #ef4444 40px, transparent 40px),
+            /* Vertical red right margin line */
+            linear-gradient(to left, transparent 39px, #ef4444 /* red-500 */ 39px, #ef4444 40px, transparent 40px);
+        background-size: 100% 1.5em, 100% 100%, 100% 100%;
+        background-repeat: repeat-y, no-repeat, no-repeat;
+        background-position:
+            left top, /* Horizontal lines */
+            left top, /* Left margin */
+            right top; /* Right margin */
+      }
+      .bg-blue-ruled-assignment {
+        background-color: white; /* Base color */
+        background-image: linear-gradient(to bottom, transparent calc(1.5em - 1px), #93c5fd /* blue-300 */ 1.5em);
+        background-size: 100% 1.5em;
+      }
+      .bg-exam-paper-yellow {
+        background-color: #fef3c7; /* yellow-200 */
+        background-image: linear-gradient(to bottom, transparent calc(1.5em - 1px), #60a5fa /* blue-400 */ 1.5em);
+        background-size: 100% 1.5em;
+      }
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
+  }
+}
+</script>
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI Handwritten Text Converter",
+  "description": "Convert typed text or documents into realistic, human-like handwriting. Customize styles, paper, pen effects, and export to PDF/images with our AI-powered tool.",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "All (Web-based)",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Person",
+    "name": "Muhammad Waqar Ul Mulk"
+  },
+  "url": "YOUR_APP_URL_HERE",
+  "potentialAction": {
+    "@type": "CreateAction",
+    "target": "YOUR_APP_URL_HERE"
+  }
+}
+</script>
+</head>
+<body class="bg-slate-100">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html><link rel="stylesheet" href="index.css">
+<script src="index.tsx" type="module"></script>
